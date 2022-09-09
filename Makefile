@@ -1,34 +1,36 @@
 
 
-all: output.out outputC.out
+#all: output.out outputC.out
 
 
 
 output.out: main.o OwnLib.o
 	g++ main.o OwnLib.o -o output.out
-	#./output
+	clear # On bigger projects, comment this out
+	./output.out # On bigger projects, comment this out
+	rm *.out *.o # On bigger projects, comment this out
 
-main.o: main.cpp
-	g++ -Wall -std=c++14 -c main.cpp
+main.o: ./C++/main.cpp
+	g++ -Wall -std=c++14 -c ./C++/main.cpp
 
-OwnLib.o: OwnLib.cpp OwnLib.h
-	g++ -Wall -std=c++14 -c OwnLib.cpp
-
-
+OwnLib.o: ./C++/OwnLib.cpp ./C++/OwnLib.h
+	g++ -Wall -std=c++14 -c ./C++/OwnLib.cpp
 
 
 
-outputC.out: mainC.o OwnLibC.o
-	gcc -O mainC.o OwnLibC.o -o outputC.out 
-	#rm *.o # On bigger projects, comment this out
-	#clear # On bigger projects, comment this out
-	./outputC.out
 
-mainC.o: mainC.c
-	gcc -c mainC.c
 
-OwnLibC.o: OwnLibC.c OwnLibC.h
-	gcc -c OwnLibC.c
+# outputC.out: mainC.o OwnLibC.o
+# 	gcc -O mainC.o OwnLibC.o -o outputC.out 
+# 	#rm *.o # On bigger projects, comment this out
+# 	#clear # On bigger projects, comment this out
+# 	./outputC.out
+
+# mainC.o: mainC.c
+# 	gcc -c ./C/mainC.c
+
+# OwnLibC.o: OwnLibC.c OwnLibC.h
+# 	gcc -c ./C/OwnLibC.c
 
 
 
