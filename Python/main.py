@@ -16,8 +16,6 @@ Y = 1./(1. + 25.*np.power(X, 2))
 
 
 
-
-
 plt.plot(X, Y, label="Ground Truth")
 plt.plot(df.X, df.Y,label="Ground Truth (C++)")
 
