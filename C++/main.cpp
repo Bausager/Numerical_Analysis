@@ -17,7 +17,7 @@ using std::endl;
 using std::vector;
 
 
-std::ofstream myfile;
+std::ofstream mlagrange_intfile;
 
 int main()
 {
@@ -35,7 +35,8 @@ int main()
     uint64_t n = 1000;
     vector<double> x = linspace(-1, 1, n);
 
-    vector<double> y = lagrange_interp(&X, &Y, &x);
+    vector<double> lagrange_int = lagrange_interp(&X, &Y, &x);
+    vector<double> cubic_spine_int = cubic_spine_interp(&X, &Y, &x);
 
 
     FILE *f1 = fopen("GroundTruth.csv", "w");
@@ -55,9 +56,9 @@ int main()
     if(f2)
     {
         fprintf(f2, "x,y\n");
-        for (uint64_t i = 0; i < y.size(); ++i)
+        for (uint64_t i = 0; i < lagrange_int.size(); ++i)
         {
-            fprintf(f2, "%f,%f\n", x.at(i), y.at(i));
+            fprintf(f2, "%f,%f\n", x.at(i), lagrange_int.at(i));
         }
         
         fclose(f2);
@@ -65,9 +66,23 @@ int main()
     else printf("Unable to open the target file\n");
 
 
+    FILE *f3 = fopen("cubic_spine_interp.csv", "w");
+    if(f3)
+    {
+        fprintf(f3, "x,y\n");
+        for (uint64_t i = 0; i < cubic_spine_int.size(); ++i)
+        {
+            fprintf(f3, "%f,%f\n", x.at(i), cubic_spine_int.at(i));
+        }
+        
+        fclose(f3);
+    }
+    else printf("Unable to open the target file\n");
 
 
-    
+
+
+
 
 	return 0;
 }
