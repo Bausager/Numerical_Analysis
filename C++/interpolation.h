@@ -5,7 +5,7 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-
+#include "Eigen/Dense"
 
 std::vector<double> lagrange_interp(const std::vector<double> *const X,
 									const std::vector<double> *const Y, 
@@ -14,7 +14,9 @@ std::vector<double> lagrange_interp(const std::vector<double> *const X,
 
 std::vector<double> cubic_spine_interp(const std::vector<double> *const X,
 										const std::vector<double> *const Y,
-										const std::vector<double> *const x);
+										const std::vector<double> *const x,
+										const double alpha=0.0,
+										const double beta=0.0);
 
 
 std::vector<double> linspace(const double start,

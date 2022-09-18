@@ -17,15 +17,20 @@ using std::endl;
 using std::vector;
 
 
-std::ofstream mlagrange_intfile;
-
 int main()
 {
 
     
-
 	uint64_t m = 11;
-    vector<double> X = linspace(-1, 1, m);
+    vector<double> a1 = linspace(-3.1415/2, 3.1415/2, m);
+    vector<double> X;
+    for (uint64_t i = 0; i < m; ++i)
+    {
+        X.push_back(sin(a1.at(i)));
+    }
+
+
+
     vector<double> Y;
     for (uint64_t i = 0; i < m; ++i)
     {
@@ -33,7 +38,14 @@ int main()
     }
 
     uint64_t n = 1000;
-    vector<double> x = linspace(-1, 1, n);
+    vector<double> a2 = linspace(-3.1415/2, 3.1415/2, n);
+    vector<double> x;
+     for (uint64_t i = 0; i < n; ++i)
+    {
+        x.push_back(sin(a2.at(i)));
+    }
+
+    
 
     vector<double> lagrange_int = lagrange_interp(&X, &Y, &x);
     vector<double> cubic_spine_int = cubic_spine_interp(&X, &Y, &x);

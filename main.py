@@ -24,10 +24,10 @@ plt.plot(df2.x, df2.y, marker='.', linestyle="None", label="Cubic Spline Interp"
 
 
 
-plt.plot(df.X, df.Y, marker='*', linestyle="None", label="Ground Truth (C++)")
+plt.plot(df.X, df.Y,markersize=10, marker='*', linestyle="None", label="Ground Truth (C++)")
 
 
-
+plt.ylim(-0.25, 1.5)
 plt.grid()
 plt.legend()
 plt.show()

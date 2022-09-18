@@ -7,7 +7,8 @@
 std::vector<double> lagrange_interp(const std::vector<double> *const X,
 									const std::vector<double> *const Y, 
 									const std::vector<double> *const x, 
-									uint8_t order){
+									uint8_t order)
+{
 
 	std::vector<double> y;
 	y.reserve((*x).size());
@@ -58,53 +59,98 @@ std::vector<double> lagrange_interp(const std::vector<double> *const X,
 
 std::vector<double> cubic_spine_interp(const std::vector<double> *const X,
 											const std::vector<double> *const Y,
-											const std::vector<double> *const x){
+											const std::vector<double> *const x,
+											const double alpha,
+											const double beta)
+{
+
+	
+	uint64_t N_points = (*X).size();
+	uint64_t n_points = (*x).size();
+
+
+
 	std::vector<double> y;
-	y.reserve((*x).size());
+	y.reserve(n_points);
 
+	double delta[N_points-1] = {0.0};
 
-	for (uint64_t n = 0; n < (*x).size(); ++n)
+	Eigen::MatrixXd A(N_points-2, N_points-2);
+	A.setZero();
+	Eigen::VectorXd b(N_points-2);
+	b.setZero();
+	Eigen::VectorXd c(N_points-2);
+	c.setZero();
+	Eigen::VectorXd g(N_points);
+	g.setZero();
+
+	// std::cout << A << std::endl;
+
+	for (uint64_t i = 0; i < N_points-1; ++i)
 	{
-		uint64_t idx = search_closest(X, &x->at(n));
-		//printf("%ld\n", idx);
+		delta[i] = (*X).at(i+1) - (*X).at(i);
+		//printf("%f\n", delta[i]);
+	}
 
-		if (idx == 0)
+	for (uint64_t i = 0; i < N_points-2; ++i)
+	{
+		if (i == 0) // start condetion
 		{
-			y.push_back((*X).at(idx));
-			//printf("%ld\n", idx);
+			A(i,i) = ((delta[i])/6.0)*alpha + ((delta[i] + delta[i+1])/3.0); // b_tilde
+			A(i,i+1) = delta[i+1]/6.0; // c
 		}
-		else if (idx >= (*X).size() - 2)
+		else if (i == static_cast<uint64_t>(A.rows()) -1) // end condetion
 		{
-			y.push_back((*X).at(idx));
-			//printf("%ld\n", idx);
-		}
-		else
+	 		A(i,i-1) = delta[i]/6.0; // a
+            A(i,i) = ((delta[i] + delta[i+1])/3.0) + (beta*(delta[i+1]/6.0)); // b_tilde_tilde   
+	 	}
+	 	else
+	 	{
+
+	 		A(i,i-1) = delta[i]/6.0; // a
+            A(i,i) = (delta[i] + delta[i+1])/3.0; // b
+            A(i,i+1) = delta[i+1]/6.0; // c
+	 	}
+
+	 	b(i) = (((*Y).at(i+2) - (*Y).at(i+1))/delta[i+1]) - (((*Y).at(i+1) - (*Y).at(i))/delta[i]); 
+	}
+	//std::cout << A << std::endl;
+
+	c = A.inverse()*b;
+
+	g(0) = c(0)*alpha;
+	g(N_points-1) = c(N_points-3)*beta;
+
+
+
+	for (uint64_t i = 1; i < N_points-1; ++i)
+	{
+		g(i) = c(i-1);
+	}
+ 	//std::cout << g << std::endl;
+
+	for (uint64_t i = 0; i < n_points; ++i)
+	{
+		for (uint64_t j = 0; j < N_points-1; ++j)
 		{
-			double dX = (*X).at(idx+1) - (*X).at(idx);
-			double dX1 = (*X).at(idx+2) - (*X).at(idx+1);
 
-			double dX_neg = (*X).at(idx) - (*X).at(idx-1);
-			double dX_neg1 = (*X).at(idx+1) - (*X).at(idx);
-
-			double dg = (((*Y).at(idx+1) - (*Y).at(idx))/dX)
-						- (((*Y).at(idx) - (*Y).at(idx-1))/dX_neg);
-
-			double dg2 = (((*Y).at(idx+2) - (*Y).at(idx+1))/dX1)
-						- (((*Y).at(idx+1) - (*Y).at(idx))/dX_neg1);
-
-			double spline = (dg/6.0) * ((pow((*X).at(idx+1) - (*x).at(n), 3) / dX) - dX*((*X).at(idx+1) - (*x).at(n)))
-
-
-
-
-			y.push_back(spline);
+			if (((*X).at(j) <= (*x).at(i)) && ((*x).at(i) <= (*X).at(j+1)))
+			{
+			// std::cout << j << std::endl;
+			y.push_back(
+				((g(j)/6.0) * ((pow(((*X).at(j+1) - (*x).at(i)), 3)/delta[j]) - (delta[j]*((*X).at(j+1) - (*x).at(i)))))
+				+ ((g(j+1)/6.0) * ((pow(((*x).at(i) - (*X).at(j)),3)/delta[j]) - (delta[j]*((*x).at(i) - (*X).at(j)))))
+				+ (((*Y).at(j) * ((*X).at(j+1) - (*x).at(i))/delta[j]) + ((*Y).at(j+1) * ((*x).at(i) - (*X).at(j))/delta[j]))
+				);
+			}
 		}
 	}
 
-
-
 	return y;
 }
+
+
+
 
 
 
