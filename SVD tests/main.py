@@ -22,9 +22,9 @@ plt.axis('off')
 
 
 
-XtX = np.dot(np.transpose(X),X)
+#XtX = np.dot(np.transpose(X),X)
 
-XT = np.transpose(X)
+#XT = np.transpose(X)
 
 n = len(X[1,:])
 
@@ -36,29 +36,30 @@ for i in tqdm(range(n)):
         XtX[j, i] = (np.dot(np.transpose(X[:,i]), X[:,j]))
 
 
+
 #print(XtX - XtX1)
 
 s, V = np.linalg.eig(XtX)
-
-idx = s.argsort()[::-1]   
-s = s[idx]
-V = V[:,idx]
-
 S = np.diag(np.sqrt(s))
 
-# S = np.zeros([len(s),len(s)])
 
-# for i in range(len(s)):
-#      S[i,i] = np.sqrt((s[i]))
+r = 100
+
+V = V[:,:r]
+S = S[:r,:r]
+
+VS = np.dot(V, np.linalg.inv(S))
+
+U = np.zeros([len(X[:,0]),r])
 
 
-U = X @ V @ np.linalg.inv(S)
+for i in tqdm(range(len(X[:,0]))):
+    for j in range(r):
+        U[i, j] = np.dot(X[i,:], VS[:,j])
 
-
-r = 1000
-
-
-Xapprox = U[:,:r] @ S[0:r,:r] @  np.transpose(V[:,:r])
+print(len(X[1,:]))
+#Xapprox = U[:,:r] @ S[:r,:r] @  np.transpose(V[:,:r])
+Xapprox = U @ S @ np.transpose(V)
 plt.figure(2)
 img = plt.imshow(Xapprox)
 img.set_cmap('gray')
@@ -81,9 +82,6 @@ img.set_cmap('gray')
 plt.axis('off')
 plt.title('r = ' + str(r))
 plt.show()
-
-
-print(U-U1)
 
 
 # # U, S, VT = np.linalg.svd(X,full_matrices=False)
