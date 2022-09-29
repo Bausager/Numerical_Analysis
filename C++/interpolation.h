@@ -10,7 +10,7 @@
 std::vector<double> lagrange_interp(const std::vector<double> *const X,
 									const std::vector<double> *const Y, 
 									const std::vector<double> *const x, 
-									uint8_t order=4);
+									uint8_t order=10);
 
 std::vector<double> cubic_spine_interp(const std::vector<double> *const X,
 										const std::vector<double> *const Y,

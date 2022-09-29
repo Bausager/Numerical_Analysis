@@ -30,39 +30,45 @@ def lagrange_interp(X, Y, x, order=4, fast=True):
     # Defining variables.
     N_points = X.shape[0]
     N_points_intp = x.shape[0]
-    points_tmp = np.zeros(order+1)
-    data_tmp = np.zeros(order+1)
     y = np.zeros(N_points_intp)
-    idx = 0
 
     if(fast):
         print("Michelles lagrange")
         for n in range(0, N_points_intp):
             
             idx_n = np.argmin(np.abs(X[:] - x[n]))
-            idx_i = 0;
+            idx_i = 0
             
             #Lower Bound
-            if(idx_n <= order/2):
-                idx_i = 0;
+            if(idx_n < (order/2)):
+                idx_i = 0
 
             #Upper Bound
-            elif(N_points-1 - idx_n <= (order/2)):
-                idx_i = N_points - (order + 1)
+            elif(N_points-1 - idx_n < (order/2)):
+                idx_i = int(N_points-1 - (order))
 
             # Normal Operation
             else:
-                idx_i = idx_n - int(order/2)
+                idx_i = idx_n - int((order/2))
 
             # For loop.
-            for j in range(order+1):
+            for j in range(0, int(order+1)):
+                #print(j)
                 p = 1
-                for i in range(order+1):
+                for i in range(0, int(order+1)):
                     if(j != i):
-                        p *= ((x[n] - X[idx_i+i])/(X[idx_i+j] - X[idx_i+i]))
+                        p *= (x[n] - X[idx_i+i])/(X[idx_i+j] - X[idx_i+i])
                 y[n] += (Y[idx_i+j] * p)
+                
+
     else:
         print("Chistoffers lagrange")
+
+        points_tmp = np.zeros(order+1)
+        data_tmp = np.zeros(order+1)
+
+        idx = 0
+
         for i in range(0, N_points_intp):
             
             idx = np.argmin(np.abs(X[:] - x[i]))
