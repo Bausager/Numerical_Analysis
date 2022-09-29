@@ -30,7 +30,6 @@ n = len(X[1,:])
 
 XtX = np.zeros([n, n])
 
-
 for i in tqdm(range(n)):
     for j in range(n):
         XtX[j, i] = (np.dot(np.transpose(X[:,i]), X[:,j]))
@@ -57,9 +56,36 @@ for i in tqdm(range(len(X[:,0]))):
     for j in range(r):
         U[i, j] = np.dot(X[i,:], VS[:,j])
 
-print(len(X[1,:]))
+
+
+n1 = len(X[1,:])
+
+#XtX1 = np.zeros([n1, n1], dtype=float)
+
+# for i in tqdm(range(n1)):
+#     for j in range(n1):
+#         XtX1[j, i] = (np.dot((X[:,i]), np.transpose(X[:,j])))
+
+
+XtX1 = X @ np.transpose(X)
+
+print(XtX1.shape)
+
+s1, U1 = np.linalg.eig(XtX1)
+S1 = np.diag(np.sqrt(s1))
+
+print(S1)
+print(U1)
+
+VT1 = np.linalg.inv(S1) @ np.linalg.inv(U1) @ X
+print(VT1)
+
+
+
 #Xapprox = U[:,:r] @ S[:r,:r] @  np.transpose(V[:,:r])
-Xapprox = U @ S @ np.transpose(V)
+#Xapprox = U @ S @ np.transpose(V)
+Xapprox = U1 @ S1 @ VT1
+print(Xapprox)
 plt.figure(2)
 img = plt.imshow(Xapprox)
 img.set_cmap('gray')
