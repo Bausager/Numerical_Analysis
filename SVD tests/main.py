@@ -40,8 +40,9 @@ for i in tqdm(range(len(X[:,0]))):
         U[i, j] = np.dot(X[i,:], VS[:,j])
 
 
-
-
+print(V.shape)
+print(U.shape)
+print(S.shape)
 
 n1 = len(X[:,0])
 
@@ -59,15 +60,14 @@ s1, U1 = np.linalg.eig(XXt)
 
 
 S1 = np.diag(np.sqrt(s1))
-
 UT1 = np.linalg.inv(U1)
+
+#S1 = S1.real
+UT1 = UT1.real
 
 # U1 = U1[:,:r]
 # S1 = S1[:r,:r]
 
-
-print(UT1.shape)
-print(X.shape)
 
 UX1 = np.zeros([len(X[:,0]),r])
 
@@ -75,20 +75,28 @@ for i in tqdm(range(len(X[:,0]))):
     for j in range(r):
         UX1[i, j] = np.dot(UT1[i,:], X[:,j])
 
-a = UT1 @ X
-print(a.shape)
 
-print(UX1.shape)
 
-ST1 = np.linalg.inv(S1[:,:])
+#a = UT1 @ X
+a = UX1
 
-print(ST1.shape)
+print(a)
+
+ST1 = np.linalg.inv(S1)
+
 
 VT1 = ST1[:r,:] @ a[:,:]
 
+V1 = np.transpose(VT1)
+U1 = np.transpose(UT1[:r,:])
+
+print(V1.shape)
+print(U1.shape)
+print(S1.shape)
+
 # #Xapprox = U[:,:r] @ S[:r,:r] @  np.transpose(V[:,:r])
 # Xapprox = U @ S @ np.transpose(V)
-Xapprox = U1[:,:r] @ (S1[:r,:r]) @ VT1[:r,:]
+Xapprox = U1 @ S1 @ VT1
 plt.figure(2)
 img = plt.imshow(Xapprox.real)
 img.set_cmap('gray')
