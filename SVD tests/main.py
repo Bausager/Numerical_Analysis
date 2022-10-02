@@ -7,109 +7,93 @@ from tqdm import tqdm
 
 plt.rcParams['figure.figsize'] = [16, 8]
 
+X = imread(os.path.join('.','','dog.jpg'))
+A = np.mean(X, -1); # Convert RGB to grayscale\n",
 
 
+n = len(A[:,0])
+m = len(A[0,:])
+
+print("n:", n)
+print("m:", m)
 plt.close()
 
-plt.figure(1)
-A = imread(os.path.join('.','','dog.jpg'))
-X = np.mean(A, -1); # Convert RGB to grayscale\n",
-
-img = plt.imshow(X)
-img.set_cmap('gray')
-plt.axis('off')
+#plt.figure(1)
+#img = plt.imshow(X)
+#img.set_cmap('gray')
+#plt.axis('off')
 
 
-n = len(X[1,:])
-XtX = np.zeros([n, n])
-for i in tqdm(range(n)):
-    for j in range(n):
-        XtX[j, i] = (np.dot(np.transpose(X[:,i]), X[:,j]))
+AtA = np.zeros([m, m], dtype=float)
+for i in tqdm(range(m)):
+    for j in range(m):
+        AtA[j, i] = (np.dot(np.transpose(A[:,i]), A[:,j]))
 
-s, V = np.linalg.eig(XtX)
+s, V = np.linalg.eig(AtA)
 S = np.diag(np.sqrt(s))
 
-r = 100
+r = 50
 V = V[:,:r]
+VT = np.transpose(V)
 S = S[:r,:r]
+
 VS = np.dot(V, np.linalg.inv(S))
 
-U = np.zeros([len(X[:,0]),r])
-for i in tqdm(range(len(X[:,0]))):
+U = np.zeros([n,r])
+for i in tqdm(range(n)):
     for j in range(r):
-        U[i, j] = np.dot(X[i,:], VS[:,j])
+        U[i, j] = np.dot(A[i,:], VS[:,j])
 
 
 
+AAt = np.zeros([n, n], dtype=float)
+for i in tqdm(range(n)):
+    for j in range(n):
+        AAt[j, i] = (np.dot((A[i,:]), np.transpose(A[j,:])))
 
-
-n1 = len(X[:,0])
-
-
-XXt = np.zeros([n1, n1], dtype=float)
-for i in tqdm(range(n1)):
-    for j in range(n1):
-        XXt[j, i] = (np.dot((X[i,:]), np.transpose(X[j,:])))
-#XXt = np.dot(X, np.transpose(X))
-
-s1, U1 = np.linalg.eig(XXt)
-#s1 = s1[:len(X[0,:])]
-#U1 = U1[:,:len(X[0,:])]
-
-
-
+s1, U1 = np.linalg.eig(AAt)
 S1 = np.diag(np.sqrt(s1))
 
-UT1 = np.linalg.inv(U1)
+r = 50
+U1_inv = np.linalg.inv(U1)
+U1 = U1[:,:r]
+S1_inv = np.linalg.inv(S1)
+S1 = S1[:r,:r]
 
-# U1 = U1[:,:r]
-# S1 = S1[:r,:r]
+SU1 = np.dot(S1_inv, U1_inv)
+SU1 = SU1.real
 
-
-print(UT1.shape)
-print(X.shape)
-
-UX1 = np.zeros([len(X[:,0]),r])
-
-for i in tqdm(range(len(X[:,0]))):
+VT1 = np.zeros([r, m], dtype=float)
+for i in tqdm(range(m)):
     for j in range(r):
-        UX1[i, j] = np.dot(UT1[i,:], X[:,j])
+        VT1[j, i] = np.dot(SU1[j,:], A[:,i])
 
-a = UT1 @ X
-print(a.shape)
 
-print(UX1.shape)
 
-ST1 = np.linalg.inv(S1[:,:])
 
-print(ST1.shape)
+plt.figure(1)
+Xapprox = U @ S @ VT
+img = plt.imshow(Xapprox)
+img.set_cmap('gray')
+plt.axis('off')
+plt.title('Method(1) of Snapshot: r = ' + str(r))
 
-VT1 = ST1[:r,:] @ a[:,:]
-
-# #Xapprox = U[:,:r] @ S[:r,:r] @  np.transpose(V[:,:r])
-# Xapprox = U @ S @ np.transpose(V)
-Xapprox = U1[:,:r] @ (S1[:r,:r]) @ VT1[:r,:]
 plt.figure(2)
+Xapprox = U1 @ S1 @ VT1
 img = plt.imshow(Xapprox.real)
 img.set_cmap('gray')
 plt.axis('off')
-plt.title('Method of Snapshot: r = ' + str(r))
+plt.title('Method(2) of Snapshot: r = ' + str(r))
 
-
-
-
-
-# # Construct approximate image\n",
-# U1, S1, VT1 = np.linalg.svd(X,full_matrices=False)
-
-
-# S1 = np.diag(S1)
-# Xapprox = U1[:,:r] @ S1[0:r,:r] @ VT1[:r,:]
-# plt.figure(3)
-# img = plt.imshow(Xapprox)
-# img.set_cmap('gray')
-# plt.axis('off')
-# plt.title('r = ' + str(r))
+plt.figure(3)
+# Construct approximate image\n",
+U2, S2, VT2 = np.linalg.svd(A, full_matrices=False)
+S2 = np.diag(S2)
+Xapprox = U2[:,:r] @ S2[:r,:r] @ VT2[:r,:]
+img = plt.imshow(Xapprox)
+img.set_cmap('gray')
+plt.axis('off')
+plt.title('r = ' + str(r))
 plt.show()
 
 
