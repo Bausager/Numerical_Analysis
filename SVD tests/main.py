@@ -23,19 +23,17 @@ plt.close()
 #img.set_cmap('gray')
 #plt.axis('off')
 
-
+r = 50
 AtA = np.zeros([m, m], dtype=float)
 for i in tqdm(range(m)):
     for j in range(m):
         AtA[j, i] = (np.dot(np.transpose(A[:,i]), A[:,j]))
 
 s, V = np.linalg.eig(AtA)
-S = np.diag(np.sqrt(s))
+S = np.diag(np.sqrt(s[:r]))
 
-r = 50
 V = V[:,:r]
 VT = np.transpose(V)
-S = S[:r,:r]
 
 VS = np.dot(V, np.linalg.inv(S))
 
@@ -88,6 +86,11 @@ plt.title('Method(2) of Snapshot: r = ' + str(r))
 plt.figure(3)
 # Construct approximate image\n",
 U2, S2, VT2 = np.linalg.svd(A, full_matrices=False)
+
+print("Shape of U:", U2.shape)
+print("Shape of S:", S2.shape)
+print("Shape of V:", VT2.shape)
+
 S2 = np.diag(S2)
 Xapprox = U2[:,:r] @ S2[:r,:r] @ VT2[:r,:]
 img = plt.imshow(Xapprox)
