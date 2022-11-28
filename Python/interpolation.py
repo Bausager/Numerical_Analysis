@@ -154,12 +154,6 @@ def cubic_spine_interp(X, Y, x, alpha=0, beta=0):
 
         b[i] = (Y[i+2] - Y[i+1])/delta[i+1] - (Y[i+1] - Y[i])/delta[i]
 
-        #print(A[i,:])
-        #print("========================================================================================")
-
-
-    
-    #print(delta)
     c = np.linalg.solve(A, b)
     c = np.append(c[0]*alpha, c)
     c = np.append(c, c[-1]*beta)
@@ -175,6 +169,93 @@ def cubic_spine_interp(X, Y, x, alpha=0, beta=0):
     return y
 
 
+def THD(x, y, n=25, b=50, fig=1):
+    """
+    Parameters
+    ----------
+    x : x-values of known data points.
+    y : y-values of known data points.
+    b : base/fundamental frequency for harmonics
+    fig : plot figures, 0 or 1
+    ----------
+
+    Returns
+    -------
+    THD : THD-values of n with base of b.
+    THDp : THD percentage of n with base of b.
+    PF : Power Factor
+    """
+    L = len(y)
+    N = int(np.floor(L/2))
+
+    Yf = np.zeros(L, dtype=complex)
+    rYf = np.zeros(N, dtype=float)
+
+    Cn_pos = np.zeros(N-1, dtype=complex)
+    Cn_neg = np.zeros(N-1, dtype=complex)
+
+    an = np.zeros(N-1, dtype=float)
+    bn = np.zeros(N-1, dtype=float)
+    cn = np.zeros(N, dtype=float)
+
+    phi = np.zeros(N-1, dtype=float)
+
+    THD = np.zeros(n+1, dtype=float)
+
+    Ts = x[1]-x[0]
+    fs = 1/Ts
+    Fc = fs/L
+    Xf = np.arange(0, N)*Fc
+
+    Yf = np.fft.fft(y, norm=None) / L
+
+    Cn_pos = Yf[1:N]
+    Cn_neg = np.flip(Yf[N+2:])
+
+    an = np.real(Cn_pos + Cn_neg)
+    bn = np.real(1j*(Cn_pos - Cn_neg))
+
+    cn[0] = np.abs(Yf[0])
+    cn[1:] = np.sqrt((an**2 + bn**2))
+
+    phi = np.real(np.arctan(-bn/an))
+    phi_base = phi[np.argmin(np.abs(Xf[:] - (b)))]
+    DPF = np.cos(phi_base)
 
 
-    
+    rYf[0] = np.abs(Yf[0])
+    rYf[1:N] = np.abs(Yf[1:N])*2
+
+    for i in range(0, n+1):
+        idx_n = np.argmin(np.abs(Xf[:] - (b*i)))
+        THD[i] = rYf[idx_n]
+
+    #THD = THD/np.sqrt(2)
+
+    THDp = round((np.sqrt(np.sum((THD[2:n]**2))))/THD[1],3)
+
+    PF = round(1/(np.sqrt(1 + THDp**2))*DPF,3)
+
+    THD /= THD[1]
+
+    if fig:
+        f, (ax1, ax2) = plt.subplots(nrows=2, ncols=1)
+        ax1.scatter(Xf, rYf)
+        ax1.set_xlim(0, b*n+0.5)
+        ax1.set_xticks(np.arange(0, b*n+0.5, step=b))  # Set label locations.
+        ax1.set_title("FFT (peak domane)")
+        ax1.set_ylabel("Magnitude")
+        ax1.set_xlabel("Frequency [Hz]")
+        ax1.grid()
+
+        ax2.bar(np.linspace(1, len(THD)-1, len(THD)-1), THD[1:])
+        ax2.set_xlim(0.5, n+0.5)
+        ax2.set_xticks(np.arange(1, n+1, step=1))  # Set label locations.
+        ax2.set_title(f"Harmonic Distortion (%THD: {100*THDp}, PF: {PF}, n = {n})")
+        ax2.set_ylabel("Percentage pr. Harmonic [%]")
+        ax2.set_xlabel("Harmonic Number [n]")
+        ax2.grid()
+
+        plt.show()
+
+    return (THD, THDp, PF)

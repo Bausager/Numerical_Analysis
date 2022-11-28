@@ -24,6 +24,7 @@ plt.close()
 #plt.axis('off')
 
 r = 50
+
 AtA = np.zeros([m, m], dtype=float)
 for i in tqdm(range(m)):
     for j in range(m):
@@ -36,11 +37,17 @@ V = V[:,:r]
 VT = np.transpose(V)
 
 VS = np.dot(V, np.linalg.inv(S))
+#print(V.shape)
+#print(S.shape)
+#print(VS.shape)
 
 U = np.zeros([n,r])
 for i in tqdm(range(n)):
     for j in range(r):
         U[i, j] = np.dot(A[i,:], VS[:,j])
+
+
+
 
 
 
@@ -52,11 +59,11 @@ for i in tqdm(range(n)):
 s1, U1 = np.linalg.eig(AAt)
 S1 = np.diag(np.sqrt(s1))
 
-r = 50
 U1_inv = np.linalg.inv(U1)
 U1 = U1[:,:r]
-S1_inv = np.linalg.inv(S1)
 S1 = S1[:r,:r]
+S1_inv = np.linalg.inv(S1)
+
 
 SU1 = np.dot(S1_inv, U1_inv)
 SU1 = SU1.real
@@ -65,7 +72,6 @@ VT1 = np.zeros([r, m], dtype=float)
 for i in tqdm(range(m)):
     for j in range(r):
         VT1[j, i] = np.dot(SU1[j,:], A[:,i])
-
 
 
 
@@ -86,10 +92,7 @@ plt.title('Method(2) of Snapshot: r = ' + str(r))
 plt.figure(3)
 # Construct approximate image\n",
 U2, S2, VT2 = np.linalg.svd(A, full_matrices=False)
-
-print("Shape of U:", U2.shape)
-print("Shape of S:", S2.shape)
-print("Shape of V:", VT2.shape)
+U3, S3, VT3 = np.linalg.svd(A, full_matrices=True)
 
 S2 = np.diag(S2)
 Xapprox = U2[:,:r] @ S2[:r,:r] @ VT2[:r,:]
@@ -97,20 +100,23 @@ img = plt.imshow(Xapprox)
 img.set_cmap('gray')
 plt.axis('off')
 plt.title('r = ' + str(r))
+
+print("Shape of U:", U.shape)
+print("Shape of S:", S.shape)
+print("Shape of V:", VT.shape)
+print("===========")
+print("Shape of U:", U1.shape)
+print("Shape of S:", S1.shape)
+print("Shape of V:", VT1.shape)
+print("===========")
+print("Shape of U:", U2.shape)
+print("Shape of S:", S2.shape)
+print("Shape of V:", VT2.shape)
+print("===========")
+print("Shape of U:", U3.shape)
+print("Shape of S:", S3.shape)
+print("Shape of V:", VT3.shape)
+print("===========")
+
 plt.show()
-
-
-# # U, S, VT = np.linalg.svd(X,full_matrices=False)
-# # S = np.diag(S)
-
-# j = 0
-# for r in (5, 20, 100):
-#  # Construct approximate image\n",
-#      Xapprox = U[:,:r] @ S[0:r,:r] @ V[:r,:]
-#      plt.figure(j+1)
-#      j += 1
-#      img = plt.imshow(Xapprox)
-#      img.set_cmap('gray')
-#      plt.axis('off')
-#      plt.title('r = ' + str(r))
-#      plt.show()
+plt.close()
